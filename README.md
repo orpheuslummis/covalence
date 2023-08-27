@@ -1,23 +1,26 @@
 # Covalence
+![Covalence](./media/covalence.jpg)
 
-Covalence is an open-source framework based on Solidity that is designed to facilitate collaborative, private, and flexible valuation within communities. It leverages on-chain fully homomorphic encryption, allowing complex computations on encrypted data while maintaining total privacy. A web application accompanies the framework, providing an accessible interface and facilitating custom deployment.
+Covalence is a framework enabling scalable allocation of value.
 
-## Potential use cases
+How does it works? A group selects its methodology of valuation, optionally private (leveraging [homorphic encryption](https://en.wikipedia.org/wiki/Homomorphic_encryption)). Members and oracles participate in the methodology, optionally over multiple rounds, which will determine a valuation. The outputs can also be fully or partially private, or public.
 
-The Covalence framework is versatile and can be applied in a multitude of contexts, including but not limited to:
+It comes with a web app for ease of use and for custom deployment.
 
-- Collaborative Decision Making: Communities can engage in shared decision-making processes, fostering a culture of collaboration and equity.
+It enables:
+- Ownership tables for assets such as music and movies, open source projects
+- New models of captable management for corporations / DAOs
+- Fund accounting waterfall distribution
+- Dynamic oracle-driven incentive mechanics for revenue share, royalties, etc
 
-- Performance Evaluation: The framework allows for a privacy-preserving assessment of individual performance based on various criteria, making it possible to automate the process of ranking and distributing rewards.
 
-- Resource Allocation: In DAOs and other decentralized entities, the Covalence framework can facilitate a private and democratic resource distribution process based on collective decisions.
+## How to contribute
 
-- Peer Reviews: Covalence can be used to establish a confidential and structured peer review system, where each member can evaluate others based on specified criteria, all while maintaining their privacy.
+We're looking for:
 
-## Contributing
+- technical contributors on various aspects: mechanism design, system design, Solidity+fhEVM programming, frontend, etc
+- funding to empower contributors to work on the project
 
-All contributors will be rewarded through allocations determined by using Covalence.
+If interested, please reach out via email o@orpheuslummis.info, Matrix @orpheus:beeper.com, or [schedule a a call](https://calendly.com/orpheuslummis/discussion30min).
 
-## Current Status
-
-As of July & August 2023, the Covalence framework is in active development.
+All contributions are rewarded by valuations *determined by the contributors group, using Covalence*.
