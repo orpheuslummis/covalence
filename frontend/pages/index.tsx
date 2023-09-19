@@ -5,6 +5,10 @@ import { getSortedPostsData } from '../lib/posts';
 import Link from 'next/link';
 import Date from '../components/date';
 import { GetStaticProps } from 'next';
+import TopNav from '../components/TopNav';
+import { Hero } from '../components/Hero';
+import { Footer } from '../components/Footer';
+import { Features } from '../components/Features';
 
 export default function Home({
   allPostsData,
@@ -16,14 +20,18 @@ export default function Home({
   }[];
 }) {
   return (
-    <Layout home>
+    <>
+     <TopNav />
+     <Hero/>
+     <Features />
+     <Layout home>
       <Head>
         <title>{siteTitle}</title>
       </Head>
       <section className={utilStyles.headingMd}>
         <p>[Your Self Introduction]</p>
-        <p>
-          (This is a sample website - you’ll be building a site like this in{' '}
+        <p className='font-bold'>
+          (This is a saample website - you’ll be building a site like this in{' '}
           <a href="https://nextjs.org/learn">our Next.js tutorial</a>.)
         </p>
       </section>
@@ -42,6 +50,10 @@ export default function Home({
         </ul>
       </section>
     </Layout>
+    <Footer />
+    </>
+   
+   
   );
 }
 
