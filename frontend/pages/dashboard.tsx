@@ -1,4 +1,4 @@
-import TopNav from '../components/TopNav';
+import {CreateGroup} from '../components/dashboard/CreateGroup';
 import {SideNav} from '../components/SideNav';
 import { useState } from 'react';
 
@@ -28,10 +28,18 @@ function Dashboard() {
         <SideNav onItemClick={handleSidebarItemClick} />
         <div className="flex-grow">
           {selectedItem ? (
-            // Render the details based on the selected item
+            
 
             <>  
             <div className="p-4 text-center">{selectedItem}</div>
+            {/* Create Group */}
+            {selectedItem == 'create-group' && (
+               
+              <CreateGroup />
+                
+            )}
+
+
             
             </>
             
