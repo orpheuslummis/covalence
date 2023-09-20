@@ -4,7 +4,7 @@ export const Features = () => {
     return (
         <>
 
-        <h1>How It Works</h1>
+        <h1 className="text-3xl font-bold text-center" >How It Works</h1>
         
 <div className="max-w-[85rem] px-4 py-10 sm:px-6 lg:px-8 lg:py-14 mx-auto">
   
@@ -19,7 +19,7 @@ export const Features = () => {
        
         <div className="space-y-2 md:space-y-4">
           <h2 className="font-bold text-3xl lg:text-4xl text-gray-800 dark:text-gray-200">
-            We tackle the challenges start-ups face
+            Value Distribution amongst your group
           </h2>
           <p className="text-gray-500">
             Besides working with start-up enterprises as a partner for digitalization, we have built enterprise products for common pain points that we have encountered in various products and projects.
