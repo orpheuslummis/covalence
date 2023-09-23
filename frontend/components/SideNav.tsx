@@ -39,7 +39,7 @@ export const SideNav = ({ onItemClick }) => {
 								<svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 opacity-75" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
 									<path strokeLinecap="round" strokeLinejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
 								</svg>
-								<span>Add Member</span>
+								<span>Contribute</span>
 							</li>
 							<li>
 								<input type="checkbox" id="menu-1" className="menu-toggle" />
@@ -70,7 +70,7 @@ export const SideNav = ({ onItemClick }) => {
 					</section>
 					<div className="divider my-0"></div>
 					<section className="menu-section px-4">
-						<span className="menu-title">Settings</span>
+						<span className="menu-title">Utility</span>
 						<ul className="menu-items">
 							<li className="menu-item">
 								<svg xmlns="http://www.w3.org/2000/svg" className="opacity-75" width="22" height="22" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" fill="none" strokeLinecap="round" strokeLinejoin="round">
@@ -95,7 +95,7 @@ export const SideNav = ({ onItemClick }) => {
 									<path d="M21 10l-2 8a2 2.5 0 0 1 -2 2h-10a2 2.5 0 0 1 -2 -2l-2 -8z"></path>
 									<path d="M12 15m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"></path>
 								</svg>
-								Contribute
+								Contributions
 							</li>
 							
 						</ul>

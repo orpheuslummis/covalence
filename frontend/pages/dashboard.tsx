@@ -1,4 +1,5 @@
 import {CreateGroup} from '../components/dashboard/CreateGroup';
+import { Overview } from '../components/dashboard/Overview';
 import {SideNav} from '../components/SideNav';
 import { useState } from 'react';
 
@@ -19,7 +20,7 @@ function Dashboard() {
     const [selectedItem, setSelectedItem] = useState(null);
   
     // Function to handle the sidebar item click
-    const handleSidebarItemClick = (item) => {
+    const handleSidebarItemClick = (item: any) => {
       setSelectedItem(item);
     };
   
@@ -32,12 +33,18 @@ function Dashboard() {
 
             <>  
             <div className="p-4 text-center">{selectedItem}</div>
+            {selectedItem == 'general' && (
+               
+               <Overview />
+                 
+             )}
             {/* Create Group */}
             {selectedItem == 'create-group' && (
                
               <CreateGroup />
                 
             )}
+            
 
 
             
@@ -46,7 +53,14 @@ function Dashboard() {
             
           ) : (
             // Default content when no item is selected
-            <h1 className="text-center">HELLO</h1>
+            <>
+            <div className='mt-5 my-5 py-5'>
+            <Overview />
+
+            </div>
+               </>
+                
+           
           )}
         </div>
       </div>
