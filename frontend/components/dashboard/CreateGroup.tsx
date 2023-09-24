@@ -1,11 +1,23 @@
 
 import React, { useState } from 'react';
+import toast, {Toaster} from 'react-hot-toast';
 
 
 
 export const CreateGroup = () => {
     const [members, setMembers] = useState([{ name: '', wallet: '' }]);
-    const [showBtn, setShowBtn] = useState(true)
+    const [showBtn, setShowBtn] = useState(true);
+
+    const [groupName, setGroupName] = useState('');
+    const [groupLogo, setGroupLogo] = useState<File | null>(null);
+    
+    const [logoUrl, setLogoUrl] = useState("");
+
+    const handleGroupLogo = (e: any) => {
+      setGroupLogo(e.target.files[0]);
+      toast.success("Successfully added Image!");
+      setLogoUrl(URL.createObjectURL(e.target.files[0]));
+    };
 
     const handleAddMember = () => {
         if(members.length < 4) {
@@ -15,6 +27,24 @@ export const CreateGroup = () => {
           }
       
     };
+
+    const createGroup = async () => {
+      try {
+
+        const logoCID = 'img'
+
+        const groupObj = {
+          groupName: groupName,
+          groupLogo: logoCID,
+          groupMembers: members,
+        }
+        
+      } catch (error) {
+        
+      }
+    }
+
+
   
     const handleMemberChange = (index, event) => {
       const updatedMembers = [...members];
