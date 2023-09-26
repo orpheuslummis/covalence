@@ -14,31 +14,34 @@ A group management system.
 - Admin cannot leave their own group.
 */
 
+// TODO fix gas inefficiencies such as looping over arrays
+
 contract GroupManagement is AccessControl {
     bytes32 public constant SYSTEM_ADMIN_ROLE = keccak256("SYSTEM_ADMIN_ROLE");
     uint256 public constant batchLimit = 50;
 
     struct Group {
         string name;
-        bytes32 cid; // Content Identifier for off-chain metadata
+        string cid; // Content Identifier for off-chain metadata
         address[] members;
     }
 
     mapping(uint256 => Group) public groups;
+    mapping(address => uint256[]) public userGroups;
 
     uint256 public nextGroupId;
 
-    event GroupCreated(uint256 groupId, bytes32 cid, address indexed admin);
+    event GroupCreated(uint256 groupId, string cid, address indexed admin);
     event AdminChanged(uint256 groupId, address indexed newAdmin, address indexed oldAdmin);
     event UserJoinedGroup(uint256 groupId, address indexed user);
     event UserLeftGroup(uint256 groupId, address indexed user);
-    event CIDUpdated(uint256 groupId, bytes32 newCID, bytes32 oldCID);
+    event CIDUpdated(uint256 groupId, string newCID, string oldCID);
     event SystemGroupDestroyed(uint256 groupId, address indexed admin);
     event SystemUserRemoved(uint256 groupId, address indexed user);
     event GroupNameUpdated(uint256 groupId, string newName, string oldName);
 
     modifier groupExists(uint256 groupId) {
-        require(groups[groupId].cid != bytes32(0), "Group does not exist");
+        require(bytes(groups[groupId].cid).length != 0, "Group does not exist");
         _;
     }
 
@@ -59,16 +62,19 @@ contract GroupManagement is AccessControl {
         return keccak256(abi.encodePacked("GROUP_ADMIN_ROLE", groupId));
     }
 
-    function createGroup(string memory name, bytes32 cid, address[] calldata initialMembers) external {
+    function createGroup(string memory name, string memory cid, address[] calldata initialMembers)
+        external
+        returns (uint256)
+    {
         require(initialMembers.length <= 100, "Too many initial members");
-        require(cid != bytes32(0), "CID cannot be empty");
+        require(bytes(cid).length != 0, "CID cannot be empty");
 
         for (uint256 i = 0; i < nextGroupId; i++) {
-            require(groups[i].cid != cid, "Group with this CID already exists");
-            require(
-                keccak256(abi.encodePacked(groups[i].name)) != keccak256(abi.encodePacked(name)),
-                "Group with this name already exists"
-            );
+            require(keccak256(bytes(groups[i].cid)) != keccak256(bytes(cid)), "Group with this CID already exists");
+            // require(
+            //     keccak256(abi.encodePacked(groups[i].name)) != keccak256(abi.encodePacked(name)),
+            //     "Group with this name already exists"
+            // );
         }
 
         groups[nextGroupId].name = name;
@@ -85,6 +91,7 @@ contract GroupManagement is AccessControl {
 
         emit GroupCreated(nextGroupId, cid, msg.sender);
         nextGroupId++;
+        return nextGroupId - 1;
     }
 
     // Add a safeguard against orphaning a group
@@ -99,18 +106,34 @@ contract GroupManagement is AccessControl {
         require(newMember != address(0), "Member address cannot be zero");
         require(!isMemberOfGroup(groupId, newMember), "Member already exists");
         groups[groupId].members.push(newMember);
+        userGroups[newMember].push(groupId); // Add the group to the user's groups
         emit UserJoinedGroup(groupId, newMember);
     }
 
-    function removeMember(uint256 groupId, address member) external groupExists(groupId) onlyGroupAdmin(groupId) {
-        _removeMember(groupId, member);
+    function removeMember(uint256 groupId, address member) public {
+        require(isMemberOfGroup(groupId, member), "Member does not exist");
+        for (uint256 i = 0; i < groups[groupId].members.length; i++) {
+            if (groups[groupId].members[i] == member) {
+                groups[groupId].members[i] = groups[groupId].members[groups[groupId].members.length - 1];
+                groups[groupId].members.pop();
+                break;
+            }
+        }
+        // Remove the group from the user's groups
+        uint256[] storage memberGroups = userGroups[member];
+        for (uint256 i = 0; i < memberGroups.length; i++) {
+            if (memberGroups[i] == groupId) {
+                memberGroups[i] = memberGroups[memberGroups.length - 1];
+                memberGroups.pop();
+                break;
+            }
+        }
         emit UserLeftGroup(groupId, member);
     }
 
     function leaveGroup(uint256 groupId) external groupExists(groupId) {
         require(!hasRole(_getGroupAdminRole(groupId), msg.sender), "Group admin cannot leave their own group");
-        _removeMember(groupId, msg.sender);
-        emit UserLeftGroup(groupId, msg.sender);
+        removeMember(groupId, msg.sender);
     }
 
     function isMemberOfGroup(uint256 groupId, address user) public view groupExists(groupId) returns (bool) {
@@ -139,12 +162,20 @@ contract GroupManagement is AccessControl {
         onlyGroupAdmin(groupId)
     {
         for (uint256 i = 0; i < members.length; i++) {
-            _removeMember(groupId, members[i]);
+            removeMember(groupId, members[i]);
         }
     }
 
-    function updateGroupCID(uint256 groupId, bytes32 newCID) external groupExists(groupId) onlyGroupAdmin(groupId) {
-        bytes32 oldCID = groups[groupId].cid;
+    function getGroupsOfUser(address user) public view returns (uint256[] memory) {
+        return userGroups[user];
+    }
+
+    function updateGroupCID(uint256 groupId, string memory newCID)
+        external
+        groupExists(groupId)
+        onlyGroupAdmin(groupId)
+    {
+        string memory oldCID = groups[groupId].cid;
         groups[groupId].cid = newCID;
         emit CIDUpdated(groupId, newCID, oldCID);
     }
@@ -159,13 +190,13 @@ contract GroupManagement is AccessControl {
         emit GroupNameUpdated(groupId, newName, oldName);
     }
 
-    function getGroupInfo(uint256 groupId) external view returns (string memory, bytes32) {
+    function getGroupInfo(uint256 groupId) external view returns (string memory, string memory) {
         return (groups[groupId].name, groups[groupId].cid);
     }
 
     function systemRemoveMember(uint256 groupId, address member) external {
         require(hasRole(SYSTEM_ADMIN_ROLE, msg.sender), "Unauthorized");
-        _removeMember(groupId, member);
+        removeMember(groupId, member);
         emit SystemUserRemoved(groupId, member);
     }
 
@@ -178,7 +209,7 @@ contract GroupManagement is AccessControl {
 
     function systemDestroyGroup(uint256 groupId) external {
         require(hasRole(SYSTEM_ADMIN_ROLE, msg.sender), "Unauthorized");
-        require(groups[groupId].cid != bytes32(0), "Group does not exist");
+        require(bytes(groups[groupId].cid).length != 0, "Group does not exist");
         delete groups[groupId];
         emit SystemGroupDestroyed(groupId, msg.sender);
     }
@@ -189,16 +220,5 @@ contract GroupManagement is AccessControl {
 
     function getGroupMembers(uint256 groupId) public view returns (address[] memory) {
         return groups[groupId].members;
-    }
-
-    function _removeMember(uint256 groupId, address member) private {
-        require(isMemberOfGroup(groupId, member), "Member does not exist");
-        for (uint256 i = 0; i < groups[groupId].members.length; i++) {
-            if (groups[groupId].members[i] == member) {
-                groups[groupId].members[i] = groups[groupId].members[groups[groupId].members.length - 1];
-                groups[groupId].members.pop();
-                break;
-            }
-        }
     }
 }

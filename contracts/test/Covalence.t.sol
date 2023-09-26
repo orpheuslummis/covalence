@@ -4,25 +4,6 @@ pragma solidity ^0.8;
 import {Test} from "forge-std/Test.sol";
 import {Covalence} from "../src/Covalence.sol";
 
-/*
-
-contract CovalenceTestFixture {
-    function setupGroup(Covalence covalence) internal {
-        address[] memory initialMembers = new address[](2);
-        initialMembers[0] = address(0xAbc);
-        initialMembers[1] = address(0xDef);
-        covalence.createGroup("Test Group", "QmTestCID", initialMembers);
-
-        string[] memory names = new string[](2);
-        uint256[] memory weights = new uint256[](2);
-        names[0] = "Quality";
-        names[1] = "Speed";
-        weights[0] = 3;
-        weights[1] = 1;
-        covalence.setEvalDimensions(1, names, weights);
-    }
-}
-
 contract CovalenceTest is Test {
     address public owner;
     Covalence public covalence;
@@ -32,149 +13,112 @@ contract CovalenceTest is Test {
         covalence = new Covalence();
     }
 
-    function test_SetDimensions() public {
-        setupGroup();
+    function fixtureGroup() internal returns (uint256) {
+        address[] memory initialMembers = new address[](2);
+        initialMembers[0] = address(0xAbc);
+        initialMembers[1] = address(0xDef);
+        uint256 groupId = covalence.createGroup("Test Group", "QmTestCID", initialMembers);
+        return groupId;
+    }
 
-        (string[] memory fetchedNames, uint256[] memory fetchedWeights) = covalence.getEvalDimensions(1);
+    function test_SetDimensions() public {
+        uint256 groupId = fixtureGroup();
+
+        string[] memory names = new string[](2);
+        uint256[] memory weights = new uint256[](2);
+        names[0] = "Quality";
+        names[1] = "Speed";
+        weights[0] = 3;
+        weights[1] = 1;
+        covalence.setDimensions(groupId, names, weights);
+
+        (string[] memory fetchedNames, uint256[] memory fetchedWeights) = covalence.getEvalDimensions(groupId);
         assertEq(fetchedNames[0], "Quality");
         assertEq(fetchedNames[1], "Speed");
         assertEq(fetchedWeights[0], 3);
         assertEq(fetchedWeights[1], 1);
     }
 
-    function test_StartEndRound() public {
-        setupGroup();
+    function testFail_StartEndRoundWithoutEval() public {
+        uint256 groupId = fixtureGroup();
 
-        covalence.startRound(1);
-        assertEq(covalence.getRoundStatus(1), Covalence.RoundStatus.Open, "Round status is not Open");
+        // need to set dimensions before starting a round
+        string[] memory names = new string[](1);
+        uint256[] memory weights = new uint256[](1);
+        names[0] = "Dimensions1";
+        weights[0] = 1;
+        covalence.setDimensions(groupId, names, weights);
+        uint256 roundId = covalence.startRound(groupId);
+        assert(covalence.getRoundStatus(groupId, roundId) == Covalence.RoundStatus.Open);
 
-        covalence.endRound(1);
-        assert(covalence.getRoundStatus(1) == Covalence.RoundStatus.Closed, "Round status is not Closed");
+        // need for all members to evaluate before closing a round, so this will fail
+        covalence.endRound(groupId);
     }
 
-    function test_Vote() public {
-        setupGroup();
+    function test_MemberScores() public {
+        uint256 groupId = fixtureGroup();
 
-        covalence.startRound(1);
+        address[] memory members = covalence.getGroupMembers(groupId);
 
-        uint256[][] memory scoresAlice = new uint256[][](3);
-        scoresAlice[0] = new uint256[](2);
-        scoresAlice[0][0] = 7;
-        scoresAlice[0][1] = 5;
-        scoresAlice[1] = new uint256[](2);
-        scoresAlice[1][0] = 6;
-        scoresAlice[1][1] = 4;
-        scoresAlice[2] = new uint256[](2);
-        scoresAlice[2][0] = 8;
-        scoresAlice[2][1] = 6;
+        // Set dimensions before starting a round
+        string[] memory names = new string[](2);
+        uint256[] memory weights = new uint256[](2);
+        names[0] = "Quality";
+        names[1] = "Speed";
+        weights[0] = 3;
+        weights[1] = 1;
+        covalence.setDimensions(groupId, names, weights);
 
-        bool successAlice = true;
-        try covalence.eval(1, scoresAlice) {}
-        catch {
-            successAlice = false;
+        // Now get the dimensions
+        (string[] memory dimensions,) = covalence.getEvalDimensions(groupId);
+
+        uint256 roundId = covalence.startRound(groupId);
+
+        // For each member, including the current member, score each member along all dimensions
+        for (uint256 i = 0; i < members.length; i++) {
+            uint256[][] memory scores = new uint256[][](members.length);
+            for (uint256 j = 0; j < members.length; j++) {
+                scores[j] = new uint256[](dimensions.length);
+                for (uint256 k = 0; k < dimensions.length; k++) {
+                    uint256 score = 1; // replace this with the actual score
+                    scores[j][k] = score;
+                }
+            }
+
+            // Ensure that the scores array is correctly structured before calling the eval function
+            require(scores.length == members.length, "Outer scores array length does not match the number of members");
+            for (uint256 j = 0; j < scores.length; j++) {
+                require(
+                    scores[j].length == dimensions.length,
+                    "Inner scores array length does not match the number of dimensions"
+                );
+            }
+
+            // Impersonate the i-th member
+            vm.prank(members[i]);
+
+            covalence.eval(groupId, roundId, scores);
         }
-        assertEq(successAlice, true);
-
-        uint256[][] memory scoresBob = new uint256[][](3);
-        scoresBob[0] = new uint256[](2);
-        scoresBob[0][0] = 7;
-        scoresBob[0][1] = 5;
-        scoresBob[1] = new uint256[](2);
-        scoresBob[1][0] = 6;
-        scoresBob[1][1] = 4;
-        scoresBob[2] = new uint256[](2);
-        scoresBob[2][0] = 8;
-        scoresBob[2][1] = 6;
-
-        bool successBob = true;
-        try covalence.eval(1, scoresBob) {}
-        catch {
-            successBob = false;
-        }
-        assertEq(successBob, true);
-
-        uint256[][] memory scoresOwner = new uint256[][](3);
-        scoresOwner[0] = new uint256[](2);
-        scoresOwner[0][0] = 7;
-        scoresOwner[0][1] = 5;
-        scoresOwner[1] = new uint256[](2);
-        scoresOwner[1][0] = 6;
-        scoresOwner[1][1] = 4;
-        scoresOwner[2] = new uint256[](2);
-        scoresOwner[2][0] = 8;
-        scoresOwner[2][1] = 6;
-
-        bool successOwner = true;
-        try covalence.eval(1, scoresOwner) {}
-        catch {
-            successOwner = false;
-        }
-        assertEq(successOwner, true);
-    }
-
-    function test_TwoMembersVote() public {
-        setupGroup();
-
-        covalence.startRound(1);
-
-        uint256[][] memory scoresAlice = new uint256[][](1);
-        scoresAlice[0] = new uint256[](2);
-        scoresAlice[0][0] = 7;
-        scoresAlice[0][1] = 5;
-        covalence.eval(1, scoresAlice);
-
-        // Verify Alice's votes
-        uint256[][] memory scoresVotedAlice = covalence.getEvalsOfMember(1, address(0xAbc));
-        assertEq(scoresVotedAlice[0][0], 7);
-        assertEq(scoresVotedAlice[0][1], 5);
-
-        uint256[][] memory scoresBob = new uint256[][](1);
-        scoresBob[0] = new uint256[](2);
-        scoresBob[0][0] = 6;
-        scoresBob[0][1] = 4;
-        covalence.eval(1, scoresBob);
-
-        // Verify Bob's votes
-        uint256[][] memory scoresVotedBob = covalence.getEvalsOfMember(1, address(0xDef));
-        assertEq(scoresVotedBob[0][0], 6);
-        assertEq(scoresVotedBob[0][1], 4);
-
-        assertEq(covalence.hasMemberEvaluated(1, address(0xAbc)), true);
-        assertEq(covalence.hasMemberEvaluated(1, address(0xDef)), true);
-    }
-
-    function test_ComputeRound() public {
-        setupGroup();
-
-        covalence.startRound(1);
-
-        uint256[][] memory scoresAlice = new uint256[][](1);
-        scoresAlice[0] = new uint256[](1);
-        scoresAlice[0][0] = 2;
-        covalence.eval(1, scoresAlice);
-
-        uint256[][] memory scoresBob = new uint256[][](1);
-        scoresBob[0] = new uint256[](1);
-        scoresBob[0][0] = 4;
-        covalence.eval(1, scoresBob);
-
-        covalence.endRound(1);
-
-        // The computation of resulting shares is not part of the Covalence contract anymore.
-        // It should be done off-chain or in another contract.
     }
 
     function test_NonMemberCannotVote() public {
-        setupGroup();
+        uint256 groupId = fixtureGroup();
 
-        covalence.startRound(1);
+        string[] memory names = new string[](1);
+        uint256[] memory weights = new uint256[](1);
+        names[0] = "Dimensions1";
+        weights[0] = 1;
+        covalence.setDimensions(groupId, names, weights);
+        uint256 roundId = covalence.startRound(groupId);
 
-        uint256[][] memory scores = new uint256[][](1);
+        uint256[][] memory scores = new uint256[][](2);
         scores[0] = new uint256[](1);
-        scores[0][0] = 5;
+        scores[0][0] = 3;
+        scores[1] = new uint256[](1);
+        scores[1][0] = 1;
 
         bool success = true;
-        try covalence.eval(1, scores) {}
+        try covalence.eval(groupId, roundId, scores) {}
         catch {
             success = false;
         }
@@ -182,5 +126,3 @@ contract CovalenceTest is Test {
         assertEq(success, false);
     }
 }
-
-*/

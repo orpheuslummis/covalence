@@ -100,24 +100,24 @@ contract Covalence is Ownable, GroupManagement {
         emit EvalDimensionsUpdated(groupId);
     }
 
-    function getRoundStatus(uint256 groupId, uint256 roundNumber) public view returns (RoundStatus) {
-        return covalenceGroups[groupId].rounds[roundNumber].status;
+    function getRoundStatus(uint256 groupId, uint256 roundId) public view returns (RoundStatus) {
+        return covalenceGroups[groupId].rounds[roundId].status;
     }
 
-    function startRound(uint256 groupId) external onlyGroupAdmin(groupId) isRoundClosed(groupId) {
+    function startRound(uint256 groupId) external onlyGroupAdmin(groupId) isRoundClosed(groupId) returns (uint256) {
         require(getGroupMemberCount(groupId) > 0, "No members to participate");
         require(covalenceGroups[groupId].evalDimensions.names.length > 0, "Evaluation dimensions not set");
 
         covalenceGroups[groupId].rounds.push();
-        Round storage newRound = covalenceGroups[groupId].rounds[covalenceGroups[groupId].rounds.length - 1];
+        uint256 roundId = covalenceGroups[groupId].rounds.length - 1;
+        Round storage newRound = covalenceGroups[groupId].rounds[roundId];
         newRound.status = RoundStatus.Open;
 
         emit RoundStarted(
-            groupId,
-            covalenceGroups[groupId].rounds.length - 1,
-            getGroupMemberCount(groupId),
-            covalenceGroups[groupId].evalDimensions.names.length
+            groupId, roundId, getGroupMemberCount(groupId), covalenceGroups[groupId].evalDimensions.names.length
         );
+
+        return roundId;
     }
 
     function allMembersEvaluated(uint256 groupId, uint256 roundNumber) private view returns (bool) {
@@ -171,10 +171,19 @@ contract Covalence is Ownable, GroupManagement {
             );
         }
 
-        for (uint256 i = 0; i < getGroupMemberCount(groupId); i++) {
-            covalenceGroups[groupId].rounds[roundNumber].scores[msg.sender][i] = scores[i];
+        // Ensure that the scores array is correctly structured before storing the scores
+        require(
+            scores.length == getGroupMemberCount(groupId),
+            "Outer scores array length does not match the number of members"
+        );
+        for (uint256 j = 0; j < scores.length; j++) {
+            require(
+                scores[j].length == covalenceGroups[groupId].evalDimensions.names.length,
+                "Inner scores array length does not match the number of dimensions"
+            );
         }
 
+        covalenceGroups[groupId].rounds[roundNumber].scores[msg.sender] = scores;
         covalenceGroups[groupId].rounds[roundNumber].memberHasEvaluated[msg.sender] = true;
 
         if (allMembersEvaluated(groupId, roundNumber)) {
