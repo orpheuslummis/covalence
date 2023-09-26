@@ -1,3 +1,4 @@
+import { ConnectButton } from "@rainbow-me/rainbowkit"
 
 
 export const SideNav = ({ onItemClick }) => {
@@ -103,6 +104,7 @@ export const SideNav = ({ onItemClick }) => {
 				</nav>
 			</section>
 			<section className="sidebar-footer justify-end bg-gray-2 pt-2">
+				<div className="ml-5"><ConnectButton /></div>
 				<div className="divider my-0"></div>
 				<div className="dropdown z-50 flex h-fit w-full cursor-pointer hover:bg-gray-4">
 					<label className="whites mx-2 flex h-fit w-full cursor-pointer p-0 hover:bg-gray-4" tabIndex="0">

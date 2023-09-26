@@ -1,4 +1,5 @@
 import {CreateGroup} from '../components/dashboard/CreateGroup';
+import { GroupInfo } from '../components/dashboard/GroupInfo';
 import { Overview } from '../components/dashboard/Overview';
 import {SideNav} from '../components/SideNav';
 import { useState } from 'react';
@@ -44,6 +45,12 @@ function Dashboard() {
               <CreateGroup />
                 
             )}
+
+            {selectedItem == 'Group' && (
+               
+               <GroupInfo />
+                 
+             )}
             
 
 
