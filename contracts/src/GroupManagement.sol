@@ -77,6 +77,7 @@ contract GroupManagement is AccessControl {
         groups[nextGroupId].cid = cid;
         _setupRole(_getGroupAdminRole(nextGroupId), msg.sender);
         groups[nextGroupId].members.push(msg.sender);
+        userGroups[msg.sender].push(nextGroupId);
 
         for (uint256 i = 0; i < initialMembers.length; i++) {
             require(initialMembers[i] != address(0), "Member address cannot be zero");
@@ -90,9 +91,9 @@ contract GroupManagement is AccessControl {
         return nextGroupId - 1;
     }
 
-    // Add a safeguard against orphaning a group
     function changeAdmin(uint256 groupId, address newAdmin) external groupExists(groupId) onlyGroupAdmin(groupId) {
         require(newAdmin != address(0), "New admin cannot be the zero address");
+        require(!isMemberOfGroup(groupId, newAdmin), "New admin must not be a member of the group");
         _setupRole(_getGroupAdminRole(groupId), newAdmin);
         _revokeRole(_getGroupAdminRole(groupId), msg.sender);
         emit AdminChanged(groupId, newAdmin, msg.sender);
