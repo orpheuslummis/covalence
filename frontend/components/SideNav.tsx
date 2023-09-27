@@ -1,7 +1,51 @@
 import { ConnectButton } from "@rainbow-me/rainbowkit"
+import { useAccount } from "wagmi"
+import { shortenAddress } from "../utils/shortenAddress";
+import { GROUP_MANAGER_ABI, GROUP_MANAGER_CONTRACT } from "../utils/Contracts";
+import { getNetwork, watchNetwork, writeContract, readContract} from "@wagmi/core";
+import { useEffect, useState } from "react";
 
+interface NavItem {
+	onItemClick: any
+}
+export const SideNav = ({ onItemClick: onItemClick }: NavItem) => {
+	const {address} = useAccount();
+	const [addr, setAddr] = useState<any>('...')
+	
+	
 
-export const SideNav = ({ onItemClick }) => {
+	const getUsersGroup = async ()=> {
+		
+		try {
+			const groups: any = await readContract({
+                address: GROUP_MANAGER_CONTRACT,
+                abi: GROUP_MANAGER_ABI,
+                functionName: "getGroupsOfUser",
+                args: [address],
+              });
+
+			  console.log('GROUPS: ',groups)
+			
+		} catch (error) {
+			console.log(error)
+			
+		}
+	}
+	
+
+	useEffect(() => {
+		getUsersGroup();
+		setAddr(address)
+		
+		
+	
+		// You can also return a cleanup function if needed
+		return () => {
+		  // This code will run when the component unmounts
+		  // You can clean up any resources or subscriptions here
+		};
+	  }, []); // The empty dependency array means this effect runs once, like componentDidMount
+	
 
     return (
         <> 
@@ -104,24 +148,22 @@ export const SideNav = ({ onItemClick }) => {
 				</nav>
 			</section>
 			<section className="sidebar-footer justify-end bg-gray-2 pt-2">
-				<div className="ml-5"><ConnectButton /></div>
+				<div className="ml-5 mr-6 "></div>
 				<div className="divider my-0"></div>
-				<div className="dropdown z-50 flex h-fit w-full cursor-pointer hover:bg-gray-4">
-					<label className="whites mx-2 flex h-fit w-full cursor-pointer p-0 hover:bg-gray-4" tabIndex="0">
+				<div className="dropdown z-50 flex h-fit w-full cursor-pointer hover:bg-gray-4	">
+					<label className="whites mx-2 flex h-fit w-full cursor-pointer p-0 hover:bg-gray-4" tabIndex={0}>
 						<div className="flex flex-row gap-4 p-4">
 							<div className="avatar-square avatar avatar-md">
 								<img src="https://i.pravatar.cc/150?img=30" alt="avatar" />
 							</div>
 
 							<div className="flex flex-col">
-								<span>Alice Bob</span>
+								<span>{shortenAddress(addr)}</span>
 							</div>
 						</div>
 					</label>
-					<div className="dropdown-menu-right-top dropdown-menu ml-2">
-						<a className="dropdown-item text-sm">Profile</a>
-						<a tabIndex="-1" className="dropdown-item text-sm">Account settings</a>
-						<a tabIndex="-1" className="dropdown-item text-sm">Disconnect</a>
+					<div className="dropdown-menu-right-top dropdown-menu ml-1  w-full">
+						<a className="dropdown-item text-sm"><ConnectButton showBalance={false}  /></a>
 						
 					</div>
 				</div>

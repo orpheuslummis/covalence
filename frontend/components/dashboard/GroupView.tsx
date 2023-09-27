@@ -9,7 +9,7 @@ export const Overview = () => {
         <h1 className="text-2xl font-bold text-center">Hi there, </h1>
 
 <div className="max-w-5xl px-4 py-10 sm:px-6 lg:px-8 lg:py-14 mx-auto">
-    <span className="font-bol text-xl py-5">Your Stats</span>
+    <span className="font-bol text-xl py-5">Your Statsss</span>
 
   <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mt-5">
 
