@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import toast, {Toaster} from 'react-hot-toast';
-import { GROUP_MANAGER_ABI, GROUP_MANAGER_CONTRACT } from '../../utils/Contracts';
+import { COVALENCE_ABI, COVALENCE_CONTRACT } from '../../utils/Contracts';
 
 import { getNetwork, watchNetwork, writeContract, waitForTransaction } from "@wagmi/core";
 import { pushImgToStorage, putJSONandGetHash } from '../../utils/ipfsGateway';
@@ -63,19 +63,24 @@ export const CreateGroup = () => {
           toast.success('Data Uploaded to Ipfs')
         }
         const { hash } = await writeContract({
-          address: GROUP_MANAGER_CONTRACT,
-          abi: GROUP_MANAGER_ABI,
+          address: COVALENCE_CONTRACT,
+          abi: COVALENCE_ABI,
           functionName: "createGroup",
           args: [groupName, groupCID, initialMemberAddress ],
         });
         
-
+        let tID
         if(hash) {
-          toast.loading('Transaction Initiated, please wait')
+           tID = toast.loading('Transaction Initiated, please wait')
+           setGroupName('');
+           setGroupLogo(null);
+           setMembers([{ name: '', wallet: '' }])
+          
           setTransactionInProgress(false)
         }
         const receipt = await waitForTransaction({ hash })
         if(receipt) {
+          toast.dismiss(tID)
           toast.success('Cool, Group Created')
          
         }

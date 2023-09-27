@@ -1,11 +1,11 @@
-export const GROUP_MANAGER_CONTRACT ="0xFe478a7BE4909F0f0aC8BE9053B32FcaF3C20e37"
+// export const GROUP_MANAGER_CONTRACT ="0xFe478a7BE4909F0f0aC8BE9053B32FcaF3C20e37"
 
-export const GROUP_MANAGER_ABI = [
-	{
-		"inputs": [],
-		"stateMutability": "nonpayable",
-		"type": "constructor"
-	},
+// export const GROUP_MANAGER_ABI = []
+
+export const COVALENCE_CONTRACT ="0xE3b09BE58edA755c8F29Ac58Aa2de82B94f73955"
+
+
+export const COVALENCE_ABI = [
 	{
 		"anonymous": false,
 		"inputs": [
@@ -64,6 +64,32 @@ export const GROUP_MANAGER_ABI = [
 				"internalType": "uint256",
 				"name": "groupId",
 				"type": "uint256"
+			}
+		],
+		"name": "EvalDimensionsUpdated",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "groupId",
+				"type": "uint256"
+			}
+		],
+		"name": "EvalMethodologyUpdated",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "groupId",
+				"type": "uint256"
 			},
 			{
 				"indexed": false,
@@ -104,6 +130,25 @@ export const GROUP_MANAGER_ABI = [
 			}
 		],
 		"name": "GroupNameUpdated",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "previousOwner",
+				"type": "address"
+			},
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "newOwner",
+				"type": "address"
+			}
+		],
+		"name": "OwnershipTransferred",
 		"type": "event"
 	},
 	{
@@ -191,13 +236,13 @@ export const GROUP_MANAGER_ABI = [
 				"type": "uint256"
 			},
 			{
-				"indexed": true,
-				"internalType": "address",
-				"name": "admin",
-				"type": "address"
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "roundNumber",
+				"type": "uint256"
 			}
 		],
-		"name": "SystemGroupDestroyed",
+		"name": "RoundDimensionsSet",
 		"type": "event"
 	},
 	{
@@ -210,13 +255,107 @@ export const GROUP_MANAGER_ABI = [
 				"type": "uint256"
 			},
 			{
-				"indexed": true,
-				"internalType": "address",
-				"name": "user",
-				"type": "address"
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "roundNumber",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "enum Covalence.RoundStatus",
+				"name": "status",
+				"type": "uint8"
 			}
 		],
-		"name": "SystemUserRemoved",
+		"name": "RoundEnded",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "groupId",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "roundNumber",
+				"type": "uint256"
+			}
+		],
+		"name": "RoundOpen",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "groupId",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "roundNumber",
+				"type": "uint256"
+			}
+		],
+		"name": "RoundReadyToEnd",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "groupId",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "roundNumber",
+				"type": "uint256"
+			}
+		],
+		"name": "RoundSet",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "groupId",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "roundNumber",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "memberCount",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "dimensionCount",
+				"type": "uint256"
+			}
+		],
+		"name": "RoundStarted",
 		"type": "event"
 	},
 	{
@@ -260,19 +399,6 @@ export const GROUP_MANAGER_ABI = [
 	{
 		"inputs": [],
 		"name": "DEFAULT_ADMIN_ROLE",
-		"outputs": [
-			{
-				"internalType": "bytes32",
-				"name": "",
-				"type": "bytes32"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "SYSTEM_ADMIN_ROLE",
 		"outputs": [
 			{
 				"internalType": "bytes32",
@@ -387,6 +513,66 @@ export const GROUP_MANAGER_ABI = [
 				"type": "uint256"
 			}
 		],
+		"name": "endRound",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "groupId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "roundNumber",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256[][]",
+				"name": "scores",
+				"type": "uint256[][]"
+			}
+		],
+		"name": "eval",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "groupId",
+				"type": "uint256"
+			}
+		],
+		"name": "getEvalDimensions",
+		"outputs": [
+			{
+				"internalType": "string[]",
+				"name": "",
+				"type": "string[]"
+			},
+			{
+				"internalType": "uint256[]",
+				"name": "",
+				"type": "uint256[]"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "groupId",
+				"type": "uint256"
+			}
+		],
 		"name": "getGroupAdminRole",
 		"outputs": [
 			{
@@ -482,6 +668,35 @@ export const GROUP_MANAGER_ABI = [
 	{
 		"inputs": [
 			{
+				"internalType": "uint256",
+				"name": "groupId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "roundNumber",
+				"type": "uint256"
+			},
+			{
+				"internalType": "address",
+				"name": "member",
+				"type": "address"
+			}
+		],
+		"name": "getMemberEvaluation",
+		"outputs": [
+			{
+				"internalType": "uint256[][]",
+				"name": "",
+				"type": "uint256[][]"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
 				"internalType": "bytes32",
 				"name": "role",
 				"type": "bytes32"
@@ -493,6 +708,66 @@ export const GROUP_MANAGER_ABI = [
 				"internalType": "bytes32",
 				"name": "",
 				"type": "bytes32"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "groupId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "roundNumber",
+				"type": "uint256"
+			}
+		],
+		"name": "getRoundResult",
+		"outputs": [
+			{
+				"components": [
+					{
+						"internalType": "address",
+						"name": "key",
+						"type": "address"
+					},
+					{
+						"internalType": "uint256",
+						"name": "value",
+						"type": "uint256"
+					}
+				],
+				"internalType": "struct Covalence.AddressToUintPair[]",
+				"name": "",
+				"type": "tuple[]"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "groupId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "roundId",
+				"type": "uint256"
+			}
+		],
+		"name": "getRoundStatus",
+		"outputs": [
+			{
+				"internalType": "enum Covalence.RoundStatus",
+				"name": "",
+				"type": "uint8"
 			}
 		],
 		"stateMutability": "view",
@@ -615,6 +890,19 @@ export const GROUP_MANAGER_ABI = [
 		"type": "function"
 	},
 	{
+		"inputs": [],
+		"name": "owner",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
 		"inputs": [
 			{
 				"internalType": "uint256",
@@ -646,6 +934,13 @@ export const GROUP_MANAGER_ABI = [
 			}
 		],
 		"name": "removeMembers",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "renounceOwnership",
 		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
@@ -689,6 +984,66 @@ export const GROUP_MANAGER_ABI = [
 	{
 		"inputs": [
 			{
+				"internalType": "uint256",
+				"name": "groupId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "string[]",
+				"name": "dimensionNames",
+				"type": "string[]"
+			},
+			{
+				"internalType": "uint256[]",
+				"name": "weights",
+				"type": "uint256[]"
+			}
+		],
+		"name": "setDimensions",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "groupId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "enum Covalence.EvalMethodology",
+				"name": "newMethodology",
+				"type": "uint8"
+			}
+		],
+		"name": "setMethodology",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "groupId",
+				"type": "uint256"
+			}
+		],
+		"name": "startRound",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
 				"internalType": "bytes4",
 				"name": "interfaceId",
 				"type": "bytes4"
@@ -708,48 +1063,12 @@ export const GROUP_MANAGER_ABI = [
 	{
 		"inputs": [
 			{
-				"internalType": "uint256",
-				"name": "groupId",
-				"type": "uint256"
-			}
-		],
-		"name": "systemDestroyGroup",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "groupId",
-				"type": "uint256"
-			},
-			{
 				"internalType": "address",
-				"name": "member",
+				"name": "newOwner",
 				"type": "address"
 			}
 		],
-		"name": "systemRemoveMember",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "groupId",
-				"type": "uint256"
-			},
-			{
-				"internalType": "address",
-				"name": "newAdmin",
-				"type": "address"
-			}
-		],
-		"name": "systemReplaceGroupAdmin",
+		"name": "transferOwnership",
 		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
@@ -815,8 +1134,3 @@ export const GROUP_MANAGER_ABI = [
 		"type": "function"
 	}
 ]
-
-export const COVALENCE_CONTRACT = ""
-
-
-export const COVALENCE_ABI = []

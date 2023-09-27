@@ -1,7 +1,7 @@
 import { ConnectButton } from "@rainbow-me/rainbowkit"
 import { useAccount } from "wagmi"
 import { shortenAddress } from "../utils/shortenAddress";
-import { GROUP_MANAGER_ABI, GROUP_MANAGER_CONTRACT } from "../utils/Contracts";
+import { COVALENCE_ABI, COVALENCE_CONTRACT } from "../utils/Contracts";
 import { getNetwork, watchNetwork, writeContract, readContract} from "@wagmi/core";
 import { useEffect, useState } from "react";
 
@@ -13,13 +13,21 @@ export const SideNav = ({ onItemClick: onItemClick }: NavItem) => {
 	const [addr, setAddr] = useState<any>('...')
 	const [allGroups, setAllGroups] = useState<any[]>([])
 	const [groupIds, setGroupIds] = useState<any[]>([])
-
+	
 	const getCurrentGroup = (id: any) => {
+		
+		console.log('GROUP', allGroups)
 		const ids = Number(id)
 		let name = '';
+
 		for(let i = 0; i<allGroups.length; i++){
 			const arr = allGroups[ids]
-			name = arr[0]
+			if(arr){
+				name = arr[0]
+
+			}
+			return
+			
 		}
 		 return name
 	}
@@ -29,12 +37,12 @@ export const SideNav = ({ onItemClick: onItemClick }: NavItem) => {
 	const getUsersGroup = async ()=> {
 		
 		try {
-			const add = '0x1c299d970ad881eD0a0E731A2c5EfB29590e5957'
+			// const add = '0x1c299d970ad881eD0a0E731A2c5EfB29590e5957'
 			const groups: any = await readContract({
-                address: GROUP_MANAGER_CONTRACT,
-                abi: GROUP_MANAGER_ABI,
+                address: COVALENCE_CONTRACT,
+                abi: COVALENCE_ABI,
                 functionName: "getGroupsOfUser",
-                args: [add],
+                args: [address],
               });
 			  setGroupIds(groups)
 			  let tempGroup = []
@@ -42,8 +50,8 @@ export const SideNav = ({ onItemClick: onItemClick }: NavItem) => {
 			  if(groups) {
 				for(let i=0; i<groups.length; i++) {
 					const data: any = await readContract({
-						address: GROUP_MANAGER_CONTRACT,
-						abi: GROUP_MANAGER_ABI,
+						address: COVALENCE_CONTRACT,
+						abi: COVALENCE_ABI,
 						functionName: "getGroupInfo",
 						args: [groups[i]],
 					  });
@@ -110,7 +118,7 @@ export const SideNav = ({ onItemClick: onItemClick }: NavItem) => {
 								</svg>
 								<span>Create Group</span>
 							</li>
-							<li className="menu-item" onClick={() => onItemClick('add-member')}>
+							<li className="menu-item" onClick={() => onItemClick('contribut-coming-soon')}>
 								<svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 opacity-75" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
 									<path strokeLinecap="round" strokeLinejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
 								</svg>
@@ -141,7 +149,7 @@ export const SideNav = ({ onItemClick: onItemClick }: NavItem) => {
 										{
 											groupIds.map((id) => (
 												
-												<label onClick={() => onItemClick('Group', id)} className="menu-item ml-6">{getCurrentGroup(id)}</label>
+												<label key={id} onClick={() => onItemClick('Group', id)} className="menu-item ml-6">{getCurrentGroup(id)}</label>
 											))
 											
 										}

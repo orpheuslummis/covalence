@@ -1,7 +1,7 @@
 
 
 import { getNetwork, watchNetwork, writeContract, readContract} from "@wagmi/core";
-import { GROUP_MANAGER_ABI, GROUP_MANAGER_CONTRACT } from "../../utils/Contracts";
+import {  COVALENCE_ABI, COVALENCE_CONTRACT } from "../../utils/Contracts";
 import { useEffect, useState } from "react";
 import { bytesToString } from "../../utils/stringToBytes";
 import axios from "axios";
@@ -43,8 +43,8 @@ export const GroupInfo = ({currentID: groupID}: NavItem) => {
         try {
 
             const groupInfo: any = await readContract({
-                address: GROUP_MANAGER_CONTRACT,
-                abi: GROUP_MANAGER_ABI,
+                address: COVALENCE_CONTRACT,
+                abi: COVALENCE_ABI,
                 functionName: "getGroupInfo",
                 args: [groupID],
               });
@@ -82,12 +82,20 @@ export const GroupInfo = ({currentID: groupID}: NavItem) => {
           ethers.utils.parseUnits(weight.toString(), 18)
         );
 
-        // const groupInfo: any = await writeContract({
-        //   address: GROUP_MANAGER_CONTRACT,
-        //   abi: GROUP_MANAGER_ABI,
-        //   functionName: "getGroupInfo",
-        //   args: [groupID, names, weightsUint],
+        // const setMethodology: any = await writeContract({
+        //   address: COVALENCE_CONTRACT,
+        //   abi: COVALENCE_ABI,
+        //   functionName: "setMethodology",
+        //   args: [groupID, 0],
         // });
+  
+
+        const setDimension: any = await writeContract({
+          address: COVALENCE_CONTRACT,
+          abi: COVALENCE_ABI,
+          functionName: "setDimensions",
+          args: [groupID, names, weightsUint],
+        });
   
         
   
