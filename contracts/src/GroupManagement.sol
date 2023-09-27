@@ -62,6 +62,8 @@ contract GroupManagement is AccessControl {
         return keccak256(abi.encodePacked("GROUP_ADMIN_ROLE", groupId));
     }
 
+    // createGroup creates a new group.
+    // The caller is made its admin and added as a member of the group and set
     function createGroup(string memory name, string memory cid, address[] calldata initialMembers)
         external
         returns (uint256)
@@ -80,7 +82,6 @@ contract GroupManagement is AccessControl {
         groups[nextGroupId].name = name;
         groups[nextGroupId].cid = cid;
         _setupRole(_getGroupAdminRole(nextGroupId), msg.sender);
-
         groups[nextGroupId].members.push(msg.sender);
 
         for (uint256 i = 0; i < initialMembers.length; i++) {

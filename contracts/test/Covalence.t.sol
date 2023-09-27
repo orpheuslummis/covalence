@@ -125,4 +125,56 @@ contract CovalenceTest is Test {
 
         assertEq(success, false);
     }
+
+    function test_MemberCanVote() public {
+        uint256 groupId = fixtureGroup();
+
+        string[] memory names = new string[](1);
+        uint256[] memory weights = new uint256[](1);
+        names[0] = "Dimensions1";
+        weights[0] = 1;
+        covalence.setDimensions(groupId, names, weights);
+
+        uint256 roundId = covalence.startRound(groupId);
+
+        uint256[][] memory scores = new uint256[][](3);
+        scores[0] = new uint256[](1);
+        scores[0][0] = 3;
+        scores[1] = new uint256[](1);
+        scores[1][0] = 1;
+        scores[2] = new uint256[](1);
+        scores[2][0] = 2;
+
+        bool success = true;
+        try covalence.eval(groupId, roundId, scores) {}
+        catch {
+            success = false;
+        }
+
+        assertEq(success, true);
+    }
+
+    function test_RoundStatusAfterVote() public {
+        uint256 groupId = fixtureGroup();
+
+        string[] memory names = new string[](1);
+        uint256[] memory weights = new uint256[](1);
+        names[0] = "Dimensions1";
+        weights[0] = 1;
+        covalence.setDimensions(groupId, names, weights);
+        uint256 roundId = covalence.startRound(groupId);
+
+        uint256[][] memory scores = new uint256[][](3);
+        scores[0] = new uint256[](1);
+        scores[0][0] = 3;
+        scores[1] = new uint256[](1);
+        scores[1][0] = 1;
+        scores[2] = new uint256[](1);
+        scores[2][0] = 2;
+
+        covalence.eval(groupId, roundId, scores);
+        Covalence.RoundStatus status = covalence.getRoundStatus(groupId, roundId);
+
+        assertEq(uint256(status), uint256(Covalence.RoundStatus.Open));
+    }
 }
