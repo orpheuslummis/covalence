@@ -176,6 +176,7 @@ contract GroupManagement is AccessControl {
         groupExists(groupId)
         onlyGroupAdmin(groupId)
     {
+        require(bytes(newCID).length > 0, "CID cannot be an empty string");
         string memory oldCID = groups[groupId].cid;
         groups[groupId].cid = newCID;
         emit CIDUpdated(groupId, newCID, oldCID);
@@ -186,6 +187,7 @@ contract GroupManagement is AccessControl {
         groupExists(groupId)
         onlyGroupAdmin(groupId)
     {
+        require(bytes(newName).length > 0, "Name cannot be an empty string");
         string memory oldName = groups[groupId].name;
         groups[groupId].name = newName;
         emit GroupNameUpdated(groupId, newName, oldName);

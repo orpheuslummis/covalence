@@ -92,4 +92,53 @@ contract GroupManagementTest is Test {
         assertEq(userGroups[0], groupId1);
         assertEq(userGroups[1], groupId2);
     }
+
+    function testFail_CreateGroupWithDuplicateMembers() public {
+        address[] memory initialMembers = new address[](2);
+        initialMembers[0] = address(0xAbc);
+        initialMembers[1] = address(0xAbc);
+        groupManagement.createGroup("Test Group", "CID", initialMembers);
+    }
+
+    function testFail_CreateGroupWithSameCID() public {
+        address[] memory initialMembers = new address[](1);
+        initialMembers[0] = address(0xAbc);
+        groupManagement.createGroup("Test Group", "CID", initialMembers);
+        groupManagement.createGroup("Test Group 2", "CID", initialMembers);
+    }
+
+    function testFail_AddZeroAddressMember() public {
+        address[] memory initialMembers = new address[](1);
+        initialMembers[0] = address(0xAbc);
+        uint256 groupId = groupManagement.createGroup("Test Group", "CID", initialMembers);
+        groupManagement.addMember(groupId, address(0));
+    }
+
+    function testFail_RemoveNonExistentMember() public {
+        address[] memory initialMembers = new address[](1);
+        initialMembers[0] = address(0xAbc);
+        uint256 groupId = groupManagement.createGroup("Test Group", "CID", initialMembers);
+        groupManagement.removeMember(groupId, address(0xDef));
+    }
+
+    function testFail_ChangeAdminToZeroAddress() public {
+        address[] memory initialMembers = new address[](1);
+        initialMembers[0] = address(0xAbc);
+        uint256 groupId = groupManagement.createGroup("Test Group", "CID", initialMembers);
+        groupManagement.changeAdmin(groupId, address(0));
+    }
+
+    function testFail_UpdateGroupCIDToEmptyString() public {
+        address[] memory initialMembers = new address[](1);
+        initialMembers[0] = address(0xAbc);
+        uint256 groupId = groupManagement.createGroup("Test Group", "CID", initialMembers);
+        groupManagement.updateGroupCID(groupId, "");
+    }
+
+    function testFail_UpdateGroupNameToEmptyString() public {
+        address[] memory initialMembers = new address[](1);
+        initialMembers[0] = address(0xAbc);
+        uint256 groupId = groupManagement.createGroup("Test Group", "CID", initialMembers);
+        groupManagement.updateGroupName(groupId, "");
+    }
 }
