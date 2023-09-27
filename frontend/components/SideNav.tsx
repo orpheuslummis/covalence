@@ -11,20 +11,50 @@ interface NavItem {
 export const SideNav = ({ onItemClick: onItemClick }: NavItem) => {
 	const {address} = useAccount();
 	const [addr, setAddr] = useState<any>('...')
+	const [allGroups, setAllGroups] = useState<any[]>([])
+	const [groupIds, setGroupIds] = useState<any[]>([])
+
+	const getCurrentGroup = (id: any) => {
+		const ids = Number(id)
+		let name = '';
+		for(let i = 0; i<allGroups.length; i++){
+			const arr = allGroups[ids]
+			name = arr[0]
+		}
+		 return name
+	}
 	
 	
 
 	const getUsersGroup = async ()=> {
 		
 		try {
+			const add = '0x1c299d970ad881eD0a0E731A2c5EfB29590e5957'
 			const groups: any = await readContract({
                 address: GROUP_MANAGER_CONTRACT,
                 abi: GROUP_MANAGER_ABI,
                 functionName: "getGroupsOfUser",
-                args: [address],
+                args: [add],
               });
+			  setGroupIds(groups)
+			  let tempGroup = []
 
-			  console.log('GROUPS: ',groups)
+			  if(groups) {
+				for(let i=0; i<groups.length; i++) {
+					const data: any = await readContract({
+						address: GROUP_MANAGER_CONTRACT,
+						abi: GROUP_MANAGER_ABI,
+						functionName: "getGroupInfo",
+						args: [groups[i]],
+					  });
+					  tempGroup.push(data)
+					 
+				}
+				setAllGroups(tempGroup)
+				console.log(groupIds)
+				
+				
+			  }
 			
 		} catch (error) {
 			console.log(error)
@@ -105,9 +135,16 @@ export const SideNav = ({ onItemClick: onItemClick }: NavItem) => {
 
 								<div className="menu-item-collapse">
 									<div className="min-h-0">
-										<label  className="menu-item menu-item-disabled ml-6">Open-Data-Hack-TeamPluto</label>
+										{/* <label  className="menu-item menu-item-disabled ml-6">Open-Data-Hack-TeamPluto</label>
 										<label onClick={() => onItemClick('Group')} className="menu-item ml-6">ETH Global-TeamBTC</label>
-										<label className="menu-item ml-6">TeamEthers</label>
+										<label className="menu-item ml-6">TeamEthers</label> */}
+										{
+											groupIds.map((id) => (
+												
+												<label onClick={() => onItemClick('Group', id)} className="menu-item ml-6">{getCurrentGroup(id)}</label>
+											))
+											
+										}
 									</div>
 								</div>
 							</li>

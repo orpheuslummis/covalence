@@ -6,13 +6,16 @@ import { useEffect, useState } from "react";
 import { bytesToString } from "../../utils/stringToBytes";
 import axios from "axios";
 import { ethers } from "ethers";
-
-export const GroupInfo = () => {
+interface NavItem {
+	currentID: any
+}
+export const GroupInfo = ({currentID: groupID}: NavItem) => {
 
     const [groupName, setGroupName] = useState('')
     const [groupLogo, setGroupLogo] = useState('')
     const [members, setMembers] = useState<any>([])
     let id = 0;
+    
     
 
 
@@ -23,7 +26,7 @@ export const GroupInfo = () => {
                 address: GROUP_MANAGER_CONTRACT,
                 abi: GROUP_MANAGER_ABI,
                 functionName: "getGroupInfo",
-                args: [0],
+                args: [groupID],
               });
 
               // console.log(groupInfo)
@@ -65,7 +68,7 @@ export const GroupInfo = () => {
         // This code will run when the component unmounts
         // You can clean up any resources or subscriptions here
       };
-      }, []); // The empty dependency array means this effect runs once, like componentDidMount
+      }, [groupID]); // The empty dependency array means this effect runs once, like componentDidMount
     
   
     return (
@@ -91,13 +94,13 @@ export const GroupInfo = () => {
 			</tr>
 		</thead>
 		<tbody>
-     {members.map((member: any) => (
+     {members.map((member: any, index: any) => (
 
-      <tr key={1}>
+      <tr key={member.wallet}>
       <th>{++id}</th>
       <td>{member.name}</td>
       <td>{member.wallet}</td>
-      <td>Blue</td>
+      <td>voted</td>
       </tr>
 
      ))}
