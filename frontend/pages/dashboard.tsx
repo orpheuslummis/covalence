@@ -5,18 +5,7 @@ import {SideNav} from '../components/SideNav';
 import { useEffect, useState } from 'react';
 
 
-//  function Dashboard  () {
 
-//     return (
-//         <> 
-        
-//         <SideNav />
-//         <h1 className="text-center">HELLO</h1>
-//                 </>
-//     )
-// }
-
-// export default Dashboard;
 function Dashboard() {
     const [selectedItem, setSelectedItem] = useState(null);
     const [selectedId, setSelectedId] = useState(null);

@@ -13,23 +13,31 @@ export const SideNav = ({ onItemClick: onItemClick }: NavItem) => {
 	const [addr, setAddr] = useState<any>('...')
 	const [allGroups, setAllGroups] = useState<any[]>([])
 	const [groupIds, setGroupIds] = useState<any[]>([])
+
+	const delayFunc = () => {
+		return ''
+	}
 	
 	const getCurrentGroup = (id: any) => {
+
+		try {
 		
-		console.log('GROUP', allGroups)
+		
 		const ids = Number(id)
 		let name = '';
 
 		for(let i = 0; i<allGroups.length; i++){
-			const arr = allGroups[ids]
-			if(arr){
-				name = arr[0]
-
-			}
-			return
+			const arr = allGroups[i]
+			name = arr[0]
+		}
+		return name
+		
+		 
+		} catch (error) {
+			console.log(error)
 			
 		}
-		 return name
+		
 	}
 	
 	
