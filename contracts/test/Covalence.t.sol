@@ -209,7 +209,6 @@ contract CovalenceTest is Test {
         assertEq(uint256(status), uint256(Covalence.RoundStatus.Completed));
     }
 
-    // Double check the inputs and the outputs of this
     function test_GetRoundResult() public {
         uint256 groupId = fixtureGroup();
 
