@@ -31,8 +31,8 @@ contract GroupManagement is AccessControl {
 
     uint256 public nextGroupId;
 
-    event GroupCreated(uint256 groupId, string cid, address indexed admin);
     event AdminChanged(uint256 groupId, address indexed newAdmin, address indexed oldAdmin);
+    event GroupCreated(uint256 groupId, string cid, address indexed admin);
     event UserJoinedGroup(uint256 groupId, address indexed user);
     event UserLeftGroup(uint256 groupId, address indexed user);
     event CIDUpdated(uint256 groupId, string newCID, string oldCID);
@@ -87,6 +87,7 @@ contract GroupManagement is AccessControl {
             require(initialMembers[i] != address(0), "Member address cannot be zero");
             require(!isMemberOfGroup(nextGroupId, initialMembers[i]), "Duplicate member");
             groups[nextGroupId].members.push(initialMembers[i]);
+            userGroups[initialMembers[i]].push(nextGroupId);
         }
 
         emit GroupCreated(nextGroupId, cid, msg.sender);

@@ -80,4 +80,16 @@ contract GroupManagementTest is Test {
         assertFalse(isMember);
         assertEq(groupManagement.getGroupMemberCount(groupId), 2);
     }
+
+    function test_getGroupsOfUser() public {
+        address[] memory initialMembers = new address[](1);
+        initialMembers[0] = address(0xAbc);
+        uint256 groupId1 = groupManagement.createGroup("Test Group 1", "CID1", initialMembers);
+        uint256 groupId2 = groupManagement.createGroup("Test Group 2", "CID2", initialMembers);
+
+        uint256[] memory userGroups = groupManagement.getGroupsOfUser(initialMembers[0]);
+        assertEq(userGroups.length, 2);
+        assertEq(userGroups[0], groupId1);
+        assertEq(userGroups[1], groupId2);
+    }
 }
