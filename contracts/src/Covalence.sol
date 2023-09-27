@@ -22,15 +22,6 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "./GroupManagement.sol";
 
 contract Covalence is Ownable, GroupManagement {
-    struct MemberData {
-        string name;
-    }
-
-    struct EvalDimensions {
-        string[] names;
-        uint256[] weights;
-    }
-
     enum EvalMethodology {
         LinearCombination,
         TBD
@@ -47,6 +38,15 @@ contract Covalence is Ownable, GroupManagement {
         mapping(address => bool) memberHasEvaluated;
         mapping(address => uint256) resultDistribution;
         RoundStatus status;
+    }
+
+    struct MemberData {
+        string name;
+    }
+
+    struct EvalDimensions {
+        string[] names;
+        uint256[] weights;
     }
 
     struct CovalenceGroup {
@@ -67,24 +67,6 @@ contract Covalence is Ownable, GroupManagement {
     event RoundReadyToEnd(uint256 groupId, uint256 roundNumber);
     event RoundEnded(uint256 groupId, uint256 roundNumber, RoundStatus status);
 
-    modifier isRoundOpen(uint256 groupId) {
-        require(
-            covalenceGroups[groupId].rounds.length > 0
-                && covalenceGroups[groupId].rounds[covalenceGroups[groupId].rounds.length - 1].status == RoundStatus.Open,
-            "No round is open"
-        );
-        _;
-    }
-
-    modifier isRoundClosed(uint256 groupId) {
-        require(
-            covalenceGroups[groupId].rounds.length == 0
-                || covalenceGroups[groupId].rounds[covalenceGroups[groupId].rounds.length - 1].status != RoundStatus.Open,
-            "A round is already open"
-        );
-        _;
-    }
-
     function setMethodology(uint256 groupId, EvalMethodology newMethodology) external onlyGroupAdmin(groupId) {
         covalenceGroups[groupId].methodology = newMethodology;
         emit EvalMethodologyUpdated(groupId);
@@ -104,7 +86,12 @@ contract Covalence is Ownable, GroupManagement {
         return covalenceGroups[groupId].rounds[roundId].status;
     }
 
-    function startRound(uint256 groupId) external onlyGroupAdmin(groupId) isRoundClosed(groupId) returns (uint256) {
+    function startRound(uint256 groupId) external onlyGroupAdmin(groupId) returns (uint256) {
+        require(
+            covalenceGroups[groupId].rounds.length == 0
+                || covalenceGroups[groupId].rounds[covalenceGroups[groupId].rounds.length - 1].status != RoundStatus.Open,
+            "A round is already open"
+        );
         require(getGroupMemberCount(groupId) > 0, "No members to participate");
         require(covalenceGroups[groupId].evalDimensions.names.length > 0, "Evaluation dimensions not set");
 
@@ -130,7 +117,12 @@ contract Covalence is Ownable, GroupManagement {
         return true;
     }
 
-    function endRound(uint256 groupId) external onlyGroupAdmin(groupId) isRoundOpen(groupId) {
+    function endRound(uint256 groupId) external onlyGroupAdmin(groupId) {
+        require(
+            covalenceGroups[groupId].rounds.length > 0
+                && covalenceGroups[groupId].rounds[covalenceGroups[groupId].rounds.length - 1].status == RoundStatus.Open,
+            "No round is open"
+        );
         uint256 roundNumber = covalenceGroups[groupId].rounds.length - 1;
         require(allMembersEvaluated(groupId, roundNumber), "Not all members have evaluated.");
 
@@ -189,14 +181,6 @@ contract Covalence is Ownable, GroupManagement {
         if (allMembersEvaluated(groupId, roundNumber)) {
             emit RoundReadyToEnd(groupId, roundNumber);
         }
-    }
-
-    function getEvalsOfMember(uint256 groupId, uint256 roundNumber, address _member)
-        public
-        view
-        returns (uint256[][] memory)
-    {
-        return covalenceGroups[groupId].rounds[roundNumber].scores[_member];
     }
 
     function getEvalDimensions(uint256 groupId) public view returns (string[] memory, uint256[] memory) {
@@ -264,20 +248,9 @@ contract Covalence is Ownable, GroupManagement {
     function getMemberEvaluation(uint256 groupId, uint256 roundNumber, address member)
         external
         view
-        returns (uint256[] memory)
+        returns (uint256[][] memory)
     {
         require(covalenceGroups[groupId].rounds[roundNumber].memberHasEvaluated[member], "Member did not evaluate");
-        uint256 index = findMemberIndex(groupId, member);
-        return covalenceGroups[groupId].rounds[roundNumber].scores[member][index];
-    }
-
-    function findMemberIndex(uint256 groupId, address member) private view returns (uint256) {
-        address[] memory groupMembers = getGroupMembers(groupId);
-        for (uint256 i = 0; i < groupMembers.length; i++) {
-            if (groupMembers[i] == member) {
-                return i;
-            }
-        }
-        revert("Member not found");
+        return covalenceGroups[groupId].rounds[roundNumber].scores[member];
     }
 }

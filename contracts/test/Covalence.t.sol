@@ -177,4 +177,70 @@ contract CovalenceTest is Test {
 
         assertEq(uint256(status), uint256(Covalence.RoundStatus.Open));
     }
+
+    function test_EndRound() public {
+        uint256 groupId = fixtureGroup();
+
+        string[] memory names = new string[](1);
+        uint256[] memory weights = new uint256[](1);
+        names[0] = "Dimensions1";
+        weights[0] = 1;
+        covalence.setDimensions(groupId, names, weights);
+        uint256 roundId = covalence.startRound(groupId);
+
+        uint256[][] memory scores = new uint256[][](3);
+        scores[0] = new uint256[](1);
+        scores[0][0] = 3;
+        scores[1] = new uint256[](1);
+        scores[1][0] = 1;
+        scores[2] = new uint256[](1);
+        scores[2][0] = 2;
+
+        // Each member, including the contract owner, needs to do an 'eval' before ending the round
+        address[] memory members = covalence.getGroupMembers(groupId);
+        for (uint256 i = 0; i < members.length; i++) {
+            vm.prank(members[i]);
+            covalence.eval(groupId, roundId, scores);
+        }
+
+        covalence.endRound(groupId);
+        Covalence.RoundStatus status = covalence.getRoundStatus(groupId, roundId);
+
+        assertEq(uint256(status), uint256(Covalence.RoundStatus.Completed));
+    }
+
+    // Double check the inputs and the outputs of this
+    function test_GetRoundResult() public {
+        uint256 groupId = fixtureGroup();
+
+        string[] memory names = new string[](1);
+        uint256[] memory weights = new uint256[](1);
+        names[0] = "Dimensions1";
+        weights[0] = 1;
+        covalence.setDimensions(groupId, names, weights);
+        uint256 roundId = covalence.startRound(groupId);
+
+        uint256[][] memory scores = new uint256[][](3);
+        scores[0] = new uint256[](1);
+        scores[0][0] = 1;
+        scores[1] = new uint256[](1);
+        scores[1][0] = 1;
+        scores[2] = new uint256[](1);
+        scores[2][0] = 1;
+
+        // Each member, including the contract owner, needs to do an 'eval' before ending the round
+        address[] memory members = covalence.getGroupMembers(groupId);
+        for (uint256 i = 0; i < members.length; i++) {
+            vm.prank(members[i]);
+            covalence.eval(groupId, roundId, scores);
+        }
+
+        covalence.endRound(groupId);
+        Covalence.AddressToUintPair[] memory results = covalence.getRoundResult(groupId, roundId);
+
+        assertEq(results.length, 3);
+        assertEq(results[0].value * 100 / 1e18, 33);
+        assertEq(results[1].value * 100 / 1e18, 33);
+        assertEq(results[2].value * 100 / 1e18, 33);
+    }
 }

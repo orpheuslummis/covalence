@@ -5,7 +5,6 @@ import "@openzeppelin/contracts/access/AccessControl.sol";
 
 /*
 A group management system.
-- Contract owner (SYSTEM_ADMIN_ROLE) has admin rights over the system.
 - Users can create a new group.
 - The creator of a group is its admin.
 - The admin can transfer its admin role to a different user.
@@ -17,7 +16,6 @@ A group management system.
 // TODO fix gas inefficiencies such as looping over arrays
 
 contract GroupManagement is AccessControl {
-    bytes32 public constant SYSTEM_ADMIN_ROLE = keccak256("SYSTEM_ADMIN_ROLE");
     uint256 public constant batchLimit = 50;
 
     struct Group {
@@ -36,8 +34,6 @@ contract GroupManagement is AccessControl {
     event UserJoinedGroup(uint256 groupId, address indexed user);
     event UserLeftGroup(uint256 groupId, address indexed user);
     event CIDUpdated(uint256 groupId, string newCID, string oldCID);
-    event SystemGroupDestroyed(uint256 groupId, address indexed admin);
-    event SystemUserRemoved(uint256 groupId, address indexed user);
     event GroupNameUpdated(uint256 groupId, string newName, string oldName);
 
     modifier groupExists(uint256 groupId) {
@@ -50,9 +46,7 @@ contract GroupManagement is AccessControl {
         _;
     }
 
-    constructor() {
-        _setupRole(SYSTEM_ADMIN_ROLE, msg.sender);
-    }
+    constructor() {}
 
     function getGroupAdminRole(uint256 groupId) public pure returns (bytes32) {
         return _getGroupAdminRole(groupId);
@@ -196,26 +190,6 @@ contract GroupManagement is AccessControl {
 
     function getGroupInfo(uint256 groupId) external view returns (string memory, string memory) {
         return (groups[groupId].name, groups[groupId].cid);
-    }
-
-    function systemRemoveMember(uint256 groupId, address member) external {
-        require(hasRole(SYSTEM_ADMIN_ROLE, msg.sender), "Unauthorized");
-        removeMember(groupId, member);
-        emit SystemUserRemoved(groupId, member);
-    }
-
-    function systemReplaceGroupAdmin(uint256 groupId, address newAdmin) external {
-        require(hasRole(SYSTEM_ADMIN_ROLE, msg.sender), "Unauthorized");
-        require(newAdmin != address(0), "New admin cannot be the zero address");
-        _setupRole(_getGroupAdminRole(groupId), newAdmin);
-        emit AdminChanged(groupId, newAdmin, msg.sender);
-    }
-
-    function systemDestroyGroup(uint256 groupId) external {
-        require(hasRole(SYSTEM_ADMIN_ROLE, msg.sender), "Unauthorized");
-        require(bytes(groups[groupId].cid).length != 0, "Group does not exist");
-        delete groups[groupId];
-        emit SystemGroupDestroyed(groupId, msg.sender);
     }
 
     function getGroupMemberCount(uint256 groupId) public view returns (uint256) {
