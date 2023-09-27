@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import toast, {Toaster} from 'react-hot-toast';
 import { GROUP_MANAGER_ABI, GROUP_MANAGER_CONTRACT } from '../../utils/Contracts';
 
-import { getNetwork, watchNetwork, writeContract } from "@wagmi/core";
+import { getNetwork, watchNetwork, writeContract, waitForTransaction } from "@wagmi/core";
 import { pushImgToStorage, putJSONandGetHash } from '../../utils/ipfsGateway';
 import { stringToBytes } from '../../utils/stringToBytes';
 import { ethers } from 'ethers';
@@ -11,6 +11,7 @@ import { ethers } from 'ethers';
 export const CreateGroup = () => {
     const [members, setMembers] = useState([{ name: '', wallet: '' }]);
     const [showBtn, setShowBtn] = useState(true);
+    const [isTransactionInProgress, setTransactionInProgress] = useState(false);
 
     const [groupName, setGroupName] = useState('');
     const [groupLogo, setGroupLogo] = useState<File | null>(null);
@@ -37,9 +38,14 @@ export const CreateGroup = () => {
     const createGroup = async () => {
       try {
 
-        const logoCID = await pushImgToStorage(groupLogo)
-        console.log('**', logoCID)
+        if(groupLogo && groupName && members.length>0) {
+          setTransactionInProgress(true)
+          const logoCID = await pushImgToStorage(groupLogo)
 
+          if (logoCID) {
+            toast.success('Image Uploaded to Ipfs')
+          }
+        
         let initialMemberAddress = []
        for (let i = 0; i<members.length; i++) {
         const address = members[i].wallet;
@@ -51,11 +57,11 @@ export const CreateGroup = () => {
           groupLogo: logoCID,
           groupMembers: members,
         }
-        console.log(groupObj)
-
-
+         
         const groupCID = await putJSONandGetHash(groupObj)
-        
+        if (groupCID) {
+          toast.success('Data Uploaded to Ipfs')
+        }
         const { hash } = await writeContract({
           address: GROUP_MANAGER_CONTRACT,
           abi: GROUP_MANAGER_ABI,
@@ -63,8 +69,32 @@ export const CreateGroup = () => {
           args: [groupName, groupCID, initialMemberAddress ],
         });
         
-      } catch (error) {
+
+        if(hash) {
+          toast.loading('Transaction Initiated, please wait')
+          setTransactionInProgress(false)
+        }
+        const receipt = await waitForTransaction({ hash })
+        if(receipt) {
+          toast.success('Cool, Group Created')
+         
+        }
+
+        setGroupName('');
+        setGroupLogo(null);
+        setMembers([{ name: '', wallet: '' }])
+        
+
+
+        } else {
+          toast.error('something went wrong, please Fill in the Form')
+          setTransactionInProgress(false)
+        }
+
+              } catch (error) {
         console.log(error)
+        toast.error('Oops, something went wrong')
+        setTransactionInProgress(false)
         
       }
     }
@@ -92,6 +122,8 @@ export const CreateGroup = () => {
 
     return (
         <>
+
+<Toaster />
        
 <div className="max-w-4xl px-4 py-10 sm:px-6 lg:px-8 lg:py-14 mx-auto">
   
@@ -205,6 +237,41 @@ export const CreateGroup = () => {
       </div>
     </form>
   </div>
+
+  <input
+        type="checkbox"
+        id="modal-3"
+        className="modal-state"
+        checked={isTransactionInProgress}
+        onChange={() => {}}
+      />
+
+  {isTransactionInProgress && (
+        <div className="modal">
+          <div className="modal-overlay"></div>
+          <div className="modal-content flex flex-col gap-5">
+            <button
+              onClick={() => setTransactionInProgress(false)}
+              className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
+            >
+              ✕
+            </button>
+            <h2 className="text-xl">Transaction in Progress</h2>
+            <div className="ml-14">
+              <div className="spinner-wave">
+                <div className="spinner-wave-dot"></div>
+                <div className="spinner-wave-dot"></div>
+                <div className="spinner-wave-dot"></div>
+                <div className="spinner-wave-dot"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+  
+
+  
+  
  
 </div>
 
