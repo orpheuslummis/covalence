@@ -2,13 +2,21 @@ import { CreateGroup } from "../components/dashboard/CreateGroup";
 import { GroupInfo } from "../components/dashboard/GroupInfo";
 import { Overview } from "../components/dashboard/Overview";
 import { SideNav } from "../components/SideNav";
+import { PleaseLogin } from "../components/PleaseLogin";
+import { useAccount } from "wagmi";
 import { useEffect, useState } from "react";
 
-function Dashboard() {
+function Dashboard({
+  contractAddress,
+  contractABI,
+}: {
+  contractAddress: `0x${string}`;
+  contractABI: any[];
+}) {
+  const { address } = useAccount();
   const [selectedItem, setSelectedItem] = useState(null);
   const [selectedId, setSelectedId] = useState(null);
 
-  // Function to handle the sidebar item click
   const handleSidebarItemClick = (item: any, id: any) => {
     setSelectedItem(item);
     console.log(id);
@@ -19,37 +27,65 @@ function Dashboard() {
     }
   };
 
-  useEffect(() => {
-    // Your logic here based on selectedItem
-    // For example, you can fetch data or perform actions when selectedItem changes
-    // You can switch based on selectedItem and render different components
-    // or perform any other actions you need.
-  }, [selectedId]);
+  useEffect(() => {}, [selectedId]);
 
-  return (
-    <div className="flex">
-      <SideNav onItemClick={handleSidebarItemClick} />
-      <div className="flex-grow">
-        {selectedItem ? (
-          <>
-            <div className="p-4 text-center">{selectedItem}</div>
-            {selectedItem == "general" && <Overview />}
-            {/* Create Group */}
-            {selectedItem == "create-group" && <CreateGroup />}
+  if (!address) {
+    return <PleaseLogin />;
+  } else {
+    const content = () => {
+      if (selectedItem === "general") {
+        return (
+          <Overview
+            contractAddress={contractAddress}
+            contractABI={contractABI}
+            address={address}
+          />
+        );
+      } else if (selectedItem === "create-group") {
+        return (
+          <CreateGroup
+            contractAddress={contractAddress}
+            contractABI={contractABI}
+            address={address}
+          />
+        );
+      } else if (selectedItem === "Group") {
+        return (
+          <GroupInfo
+            currentID={selectedId}
+            contractAddress={contractAddress}
+            contractABI={contractABI}
+            address={address}
+          />
+        );
+      } else {
+        return (
+          <div className="mt-5 my-5 py-5">
+            <Overview
+              contractAddress={contractAddress}
+              contractABI={contractABI}
+              address={address}
+            />
+          </div>
+        );
+      }
+    };
 
-            {selectedItem == "Group" && <GroupInfo currentID={selectedId} />}
-          </>
-        ) : (
-          // Default content when no item is selected
-          <>
-            <div className="mt-5 my-5 py-5">
-              <Overview />
-            </div>
-          </>
-        )}
+    return (
+      <div className="flex">
+        <SideNav
+          contractAddress={contractAddress}
+          contractABI={contractABI}
+          onItemClick={handleSidebarItemClick}
+          address={address}
+        />
+        <div className="flex-grow">
+          <div className="p-4 text-center">{selectedItem}</div>
+          {content()}
+        </div>
       </div>
-    </div>
-  );
+    );
+  }
 }
 
 export default Dashboard;
