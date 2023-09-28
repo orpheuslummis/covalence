@@ -1,18 +1,17 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
-
-import {
-  getNetwork,
-  watchNetwork,
-  writeContract,
-  waitForTransaction,
-} from "@wagmi/core";
+import { writeContract, waitForTransaction } from "@wagmi/core";
 import { pushImgToStorage, putJSONandGetHash } from "../../utils/ipfsGateway";
-import { stringToBytes } from "../../utils/stringToBytes";
-import { ethers } from "ethers";
-import { getContractData } from "../../utils/Contracts";
 
-export const CreateGroup = () => {
+export const CreateGroup = ({
+  contractAddress,
+  contractABI,
+  address,
+}: {
+  contractAddress: `0x${string}`;
+  contractABI: any[];
+  address: string;
+}) => {
   const [members, setMembers] = useState([{ name: "", wallet: "" }]);
   const [showBtn, setShowBtn] = useState(true);
   const [isTransactionInProgress, setTransactionInProgress] = useState(false);
@@ -21,18 +20,6 @@ export const CreateGroup = () => {
   const [groupLogo, setGroupLogo] = useState<File | null>(null);
 
   const [logoUrl, setLogoUrl] = useState("");
-
-  const [contractAddress, setContractAddress] = useState<`0x${string}`>("0x");
-  const [contractABI, setContractABI] = useState<any[]>([]);
-
-  useEffect(() => {
-    const fetchContractData = async () => {
-      const { contractAddress, contractABI } = await getContractData();
-      setContractAddress(contractAddress);
-      setContractABI(contractABI);
-    };
-    fetchContractData();
-  }, []);
 
   const handleGroupLogo = (e: any) => {
     setGroupLogo(e.target.files[0]);

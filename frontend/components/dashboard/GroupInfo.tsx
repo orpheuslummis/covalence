@@ -1,40 +1,29 @@
-import {
-  getNetwork,
-  watchNetwork,
-  writeContract,
-  readContract,
-} from "@wagmi/core";
+import { writeContract, readContract } from "@wagmi/core";
 import { useEffect, useState } from "react";
-import { bytesToString } from "../../utils/stringToBytes";
 import axios from "axios";
 import { ethers } from "ethers";
-import { getContractData } from "../../utils/Contracts";
 
 interface NavItem {
   currentID: any;
 }
-export const GroupInfo = ({ currentID: groupID }: NavItem) => {
+export const GroupInfo = ({
+  currentID: groupID,
+  contractAddress,
+  contractABI,
+  address,
+}: NavItem & {
+  contractAddress: `0x${string}`;
+  contractABI: any[];
+  address: string;
+}) => {
   const [groupName, setGroupName] = useState("");
   const [groupLogo, setGroupLogo] = useState("");
   const [members, setMembers] = useState<any>([]);
 
   const [dimensionName, setDimensionName] = useState("");
   const [dimensionWeight, setDimensionWeight] = useState("");
-  const [dimensions, setDimensions] = useState([]);
   const [names, setNames] = useState<any>([]);
   const [weights, setWeights] = useState<any>([]);
-
-  const [contractAddress, setContractAddress] = useState<`0x${string}`>("0x");
-  const [contractABI, setContractABI] = useState<any[]>([]);
-
-  useEffect(() => {
-    const fetchContractData = async () => {
-      const { contractAddress, contractABI } = await getContractData();
-      setContractAddress(contractAddress);
-      setContractABI(contractABI);
-    };
-    fetchContractData();
-  }, []);
 
   let id = 0;
 
@@ -63,8 +52,6 @@ export const GroupInfo = ({ currentID: groupID }: NavItem) => {
         args: [groupID],
       });
 
-      // console.log(groupInfo)
-
       setGroupName(groupInfo[0]);
 
       const CID = groupInfo[1];
@@ -89,14 +76,6 @@ export const GroupInfo = ({ currentID: groupID }: NavItem) => {
       const weightsUint = weights.map((weight: any) =>
         ethers.utils.parseUnits(weight.toString(), 18)
       );
-
-      // const setMethodology: any = await writeContract({
-      //   address: COVALENCE_CONTRACT,
-      //   abi: COVALENCE_ABI,
-      //   functionName: "setMethodology",
-      //   args: [groupID, 0],
-      // });
-
       const setDimension: any = await writeContract({
         address: contractAddress,
         abi: contractABI,

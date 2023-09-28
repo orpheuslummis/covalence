@@ -1,39 +1,24 @@
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useAccount } from "wagmi";
 import { shortenAddress } from "../utils/shortenAddress";
-import {
-  getNetwork,
-  readContract,
-  watchNetwork,
-  writeContract,
-} from "@wagmi/core";
+import { readContract } from "@wagmi/core";
 import { useEffect, useState } from "react";
-import { getContractData } from "../utils/Contracts";
 
 interface NavItem {
   onItemClick: any;
 }
-export const SideNav = ({ onItemClick: onItemClick }: NavItem) => {
-  const { address } = useAccount();
-  const [addr, setAddr] = useState<any>("...");
+export const SideNav = ({
+  onItemClick,
+  contractAddress,
+  contractABI,
+  address,
+}: NavItem & {
+  contractAddress: `0x${string}`;
+  contractABI: any[];
+  address: string;
+}) => {
   const [allGroups, setAllGroups] = useState<any[]>([]);
   const [groupIds, setGroupIds] = useState<any[]>([]);
-
-  const [contractAddress, setContractAddress] = useState<`0x${string}`>("0x");
-  const [contractABI, setContractABI] = useState<any[]>([]);
-
-  useEffect(() => {
-    const fetchContractData = async () => {
-      const { contractAddress, contractABI } = await getContractData();
-      setContractAddress(contractAddress);
-      setContractABI(contractABI);
-    };
-    fetchContractData();
-  }, []);
-
-  const delayFunc = () => {
-    return "";
-  };
 
   const getCurrentGroup = (id: any) => {
     try {
@@ -81,7 +66,6 @@ export const SideNav = ({ onItemClick: onItemClick }: NavItem) => {
 
   useEffect(() => {
     getUsersGroup();
-    setAddr(address);
 
     // You can also return a cleanup function if needed
     return () => {
@@ -106,7 +90,7 @@ export const SideNav = ({ onItemClick: onItemClick }: NavItem) => {
           <aside className="sidebar sidebar-fixed-left sidebar-mobile h-full justify-start max-sm:fixed max-sm:-translate-x-full">
             <section className="sidebar-title items-center p-4">
               <div className="flex flex-col">
-                <a href="/">
+                <a href="/dashboard">
                   <span className="text-2xl font-bold cursor-pointer">
                     Covalence
                   </span>
@@ -326,7 +310,7 @@ export const SideNav = ({ onItemClick: onItemClick }: NavItem) => {
                     </div>
 
                     <div className="flex flex-col">
-                      <span>{shortenAddress(addr)}</span>
+                      <span>{shortenAddress(address)}</span>
                     </div>
                   </div>
                 </label>
