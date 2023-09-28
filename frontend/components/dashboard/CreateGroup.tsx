@@ -37,61 +37,77 @@ export const CreateGroup = ({
 
   const createGroup = async () => {
     try {
-      if (groupLogo && groupName && members.length > 0) {
-        setTransactionInProgress(true);
-        const logoCID = await pushImgToStorage(groupLogo);
-
-        if (logoCID) {
-          toast.success("Image Uploaded to Ipfs");
-        }
-
-        let initialMemberAddress = [];
-        for (let i = 0; i < members.length; i++) {
-          const address = members[i].wallet;
-          initialMemberAddress.push(address);
-        }
-
-        const groupObj = {
-          groupName: groupName,
-          groupLogo: logoCID,
-          groupMembers: members,
-        };
-
-        const groupCID = await putJSONandGetHash(groupObj);
-        if (groupCID) {
-          toast.success("Data Uploaded to Ipfs");
-        }
-        const { hash } = await writeContract({
-          address: contractAddress,
-          abi: contractABI,
-          functionName: "createGroup",
-          args: [groupName, groupCID, initialMemberAddress],
-        });
-
-        let tID;
-        if (hash) {
-          tID = toast.loading("Transaction Initiated, please wait");
-          setGroupName("");
-          setGroupLogo(null);
-          setMembers([{ name: "", wallet: "" }]);
-
-          setTransactionInProgress(false);
-        }
-        const receipt = await waitForTransaction({ hash });
-        if (receipt) {
-          toast.dismiss(tID);
-          toast.success("Cool, Group Created");
-        }
-
-        setGroupName("");
-        setGroupLogo(null);
-        setMembers([{ name: "", wallet: "" }]);
-      } else {
-        toast.error("something went wrong, please Fill in the Form");
-        setTransactionInProgress(false);
+      if (!groupLogo || !groupName || members.length === 0) {
+        toast.error("Please fill in all the fields");
+        return;
       }
+      for (let member of members) {
+        if (!member.name || !member.wallet) {
+          toast.error("Please fill in all the fields for each member");
+          return;
+        }
+      }
+
+      setTransactionInProgress(true);
+      const logoCID = await pushImgToStorage(groupLogo);
+
+      if (!logoCID) {
+        toast.error("Failed to upload image to IPFS");
+        setTransactionInProgress(false);
+        return;
+      }
+
+      toast.success("Image Uploaded to IPFS");
+
+      let initialMemberAddress = members.map((member) => member.wallet);
+
+      const groupObj = {
+        groupName: groupName,
+        groupLogo: logoCID,
+        groupMembers: members,
+      };
+
+      const groupCID = await putJSONandGetHash(groupObj);
+      if (!groupCID) {
+        toast.error("Failed to upload data to IPFS");
+        setTransactionInProgress(false);
+        return;
+      }
+
+      toast.success("Data Uploaded to IPFS");
+
+      const { hash } = await writeContract({
+        address: contractAddress,
+        abi: contractABI,
+        functionName: "createGroup",
+        args: [groupName, groupCID, initialMemberAddress],
+      });
+
+      if (!hash) {
+        toast.error("Failed to initiate transaction");
+        setTransactionInProgress(false);
+        return;
+      }
+
+      const tID = toast.loading("Transaction Initiated, please wait");
+      setGroupName("");
+      setGroupLogo(null);
+      setMembers([{ name: "", wallet: "" }]);
+      setTransactionInProgress(false);
+
+      const receipt = await waitForTransaction({ hash });
+      if (!receipt) {
+        toast.error("Failed to create group");
+        return;
+      }
+
+      toast.dismiss(tID);
+      toast.success("Cool, Group Created");
+      setGroupName("");
+      setGroupLogo(null);
+      setMembers([{ name: "", wallet: "" }]);
     } catch (error) {
-      console.log(error);
+      console.error(error);
       toast.error("Oops, something went wrong");
       setTransactionInProgress(false);
     }
@@ -125,7 +141,7 @@ export const CreateGroup = ({
               Create Group
             </h2>
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              create, manage your group and Team members
+              Create a new group and invite your friends to join.
             </p>
           </div>
 
@@ -141,10 +157,7 @@ export const CreateGroup = ({
                 <div className="flex items-center gap-5">
                   <img
                     className="inline-block h-16 w-16 rounded-full ring-2 ring-white dark:ring-gray-800"
-                    src={
-                      logoUrl ||
-                      "https://www.pngwing.com/en/search?q=user+Avatar"
-                    }
+                    src={logoUrl || "/images/group.jpg"}
                     alt="Image "
                   />
                   <div className="flex gap-x-2">

@@ -4,61 +4,43 @@ import { shortenAddress } from "../utils/shortenAddress";
 import { readContract } from "@wagmi/core";
 import { useEffect, useState } from "react";
 
-interface NavItem {
-  onItemClick: any;
-}
 export const SideNav = ({
   onItemClick,
   contractAddress,
   contractABI,
   address,
-}: NavItem & {
+}: {
+  onItemClick: (item: string, id?: any) => void;
   contractAddress: `0x${string}`;
   contractABI: any[];
   address: string;
 }) => {
-  const [allGroups, setAllGroups] = useState<any[]>([]);
-  const [groupIds, setGroupIds] = useState<any[]>([]);
-
-  const getCurrentGroup = (id: any) => {
-    try {
-      const ids = Number(id);
-      let name = "";
-
-      for (let i = 0; i < allGroups.length; i++) {
-        const arr = allGroups[i];
-        name = arr[0];
-      }
-      return name;
-    } catch (error) {
-      console.log(error);
-    }
-  };
+  const [userGroups, setUserGroups] = useState<any[]>([]);
 
   const getUsersGroup = async () => {
     try {
-      const groups: any = await readContract({
+      const groupsIndices: any = await readContract({
         address: contractAddress,
         abi: contractABI,
         functionName: "getGroupsOfUser",
         args: [address],
       });
-      setGroupIds(groups);
-      let tempGroup = [];
 
-      if (groups) {
-        for (let i = 0; i < groups.length; i++) {
-          const data: any = await readContract({
-            address: contractAddress,
-            abi: contractABI,
-            functionName: "getGroupInfo",
-            args: [groups[i]],
-          });
-          tempGroup.push(data);
-        }
-        setAllGroups(tempGroup);
-        console.log(groupIds);
+      let userGroupsInfo: any[] = [];
+      for (const groupIndex of groupsIndices) {
+        const groupInfo: any = await readContract({
+          address: contractAddress,
+          abi: contractABI,
+          functionName: "getGroupInfo",
+          args: [groupIndex],
+        });
+        userGroupsInfo.push({
+          groupIndex,
+          name: groupInfo[0],
+          ID: groupInfo[1],
+        });
       }
+      setUserGroups(userGroupsInfo);
     } catch (error) {
       console.log(error);
     }
@@ -66,13 +48,7 @@ export const SideNav = ({
 
   useEffect(() => {
     getUsersGroup();
-
-    // You can also return a cleanup function if needed
-    return () => {
-      // This code will run when the component unmounts
-      // You can clean up any resources or subscriptions here
-    };
-  }, []); // The empty dependency array means this effect runs once, like componentDidMount
+  }, []);
 
   return (
     <>
@@ -217,13 +193,15 @@ export const SideNav = ({
                           {/* <label  className="menu-item menu-item-disabled ml-6">Open-Data-Hack-TeamPluto</label>
 										<label onClick={() => onItemClick('Group')} className="menu-item ml-6">ETH Global-TeamBTC</label>
 										<label className="menu-item ml-6">TeamEthers</label> */}
-                          {groupIds.map((id) => (
+                          {userGroups.map((group) => (
                             <label
-                              key={id}
-                              onClick={() => onItemClick("Group", id)}
+                              key={group.ID}
+                              onClick={() =>
+                                onItemClick("Group", group.groupIndex)
+                              }
                               className="menu-item ml-6"
                             >
-                              {getCurrentGroup(id)}
+                              {group.name}
                             </label>
                           ))}
                         </div>

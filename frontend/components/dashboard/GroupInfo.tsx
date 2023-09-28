@@ -55,7 +55,6 @@ export const GroupInfo = ({
       setGroupName(groupInfo[0]);
 
       const CID = groupInfo[1];
-      console.log("CID: ", CID);
       let config: any = {
         method: "get",
         url: `https://${CID}.ipfs.w3s.link/file.json`,

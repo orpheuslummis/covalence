@@ -19,9 +19,6 @@ function Dashboard({
 
   const handleSidebarItemClick = (item: any, id: any) => {
     setSelectedItem(item);
-    console.log(id);
-
-    // Update selectedId only if selectedItem is 'Group'
     if (item === "Group") {
       setSelectedId(id);
     }
@@ -79,10 +76,7 @@ function Dashboard({
           onItemClick={handleSidebarItemClick}
           address={address}
         />
-        <div className="flex-grow">
-          <div className="p-4 text-center">{selectedItem}</div>
-          {content()}
-        </div>
+        <div className="flex-grow mt-8 mb-8">{content()}</div>
       </div>
     );
   }
